@@ -1,11 +1,9 @@
 
 {
-  "functions": {
-    "api/django.py": {
-      "runtime": "python3.11"
-    }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/api/django.py" }
+  "builds": [
+    { "src": "api/django.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "api/django.py" }
   ]
 }
