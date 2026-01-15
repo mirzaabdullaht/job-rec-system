@@ -32,10 +32,11 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
 
 # Allowed hosts can be provided via environment; defaults for local dev.
-ALLOWED_HOSTS = os.getenv(
+# Trim spaces to avoid invalid host entries from env values.
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
     'DJANGO_ALLOWED_HOSTS',
     '127.0.0.1,localhost'
-).split(',')
+).split(',') if h.strip()]
 
 
 # Application definition
@@ -190,3 +191,6 @@ if IS_VERCEL:
     MIDDLEWARE = [m for m in MIDDLEWARE if not m.startswith('whitenoise.')]
     # Use default static files storage; rely on Vercel to serve /static/*
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    # Allow Vercel dynamic preview and project domains by default
+    if '.vercel.app' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('.vercel.app')
