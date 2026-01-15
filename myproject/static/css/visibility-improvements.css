@@ -1,0 +1,267 @@
+/* Text Visibility and Accessibility Improvements */
+
+/* Improve all text colors for better readability */
+body {
+  color: #111827;
+}
+
+/* Improved label and form text contrast */
+label {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Better list item text visibility */
+.list-item-content p {
+  color: #6b7280 !important;
+  font-weight: 500;
+  font-size: 0.95rem !important;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.list-item-content strong {
+  font-weight: 700 !important;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Improve navigation link hover contrast */
+.nav-links a {
+  color: #111827;
+}
+
+/* Better filter title visibility */
+.filter-title {
+  color: #111827;
+  font-weight: 800;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+/* Improve filter label visibility */
+.filter-group label {
+  color: #111827;
+  font-weight: 700;
+  font-size: 0.95rem;
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Better section title visibility */
+.section-title {
+  color: #111827;
+  font-weight: 800;
+  background: #f9fafb;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+.page-title {
+  color: #111827;
+  font-weight: 800;
+  background: #f3f4f6;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+/* Improve application and profile text */
+.app-header strong {
+  color: #111827;
+  font-weight: 700;
+  background: #f9fafb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* Better hero subtitle */
+.hero-subtitle {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+}
+
+/* Improve button text contrast */
+.btn-primary {
+  color: white !important;
+  font-weight: 700;
+}
+
+.btn-secondary {
+  color: white !important;
+  font-weight: 700;
+}
+
+/* Improve job type badge text */
+.job-type-badge {
+  font-weight: 700 !important;
+  color: white !important;
+}
+
+/* Better notification text */
+.notification-title {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  font-size: 0.98rem !important;
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.notification-item {
+  color: #6b7280;
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #7c3aed;
+}
+
+/* Ensure all headings are dark and bold */
+h1, h2, h3, h4, h5, h6 {
+  color: #111827;
+  font-weight: 700;
+}
+
+/* Better placeholder text contrast */
+input::placeholder {
+  color: #6b7280 !important;
+  font-weight: 500;
+}
+
+textarea::placeholder {
+  color: #6b7280 !important;
+  font-weight: 500;
+}
+
+select {
+  color: #111827 !important;
+  font-weight: 500;
+  background: white !important;
+}
+
+/* Improve filter input focus states */
+.filter-input:focus,
+.filter-select:focus {
+  border-color: #7c3aed !important;
+  background: #f9fafb !important;
+}
+
+/* Better modal header text */
+.modal-header h2 {
+  color: #111827 !important;
+  font-weight: 800 !important;
+  background: #f3f4f6;
+  padding: 12px 15px;
+  border-radius: 6px;
+}
+
+/* Ensure job titles and company names are clear */
+.job-title {
+  color: #111827 !important;
+  font-weight: 700 !important;
+  background: #f9fafb;
+  padding: 10px 12px;
+  border-radius: 6px;
+}
+
+.company-name {
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Improve job location and meta text */
+.job-location {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  background: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.job-meta span {
+  color: #5a6370 !important;
+  font-weight: 500 !important;
+  background: #f3f4f6;
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Better salary text visibility */
+.job-salary {
+  color: #059669 !important;
+  font-weight: 700 !important;
+  background: #ecfdf5 !important;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+/* Profile section titles */
+.profile-section-title {
+  color: #111827;
+  font-weight: 700;
+  background: #f9fafb;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+
+/* Tab and accordion headers */
+.tab-button {
+  color: #6b7280;
+  font-weight: 600;
+  background: #f3f4f6;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.tab-button.active {
+  color: white;
+  background: #7c3aed;
+  font-weight: 700;
+}
+
+/* Application status colors */
+.app-status {
+  font-weight: 700 !important;
+  padding: 6px 12px;
+  border-radius: 6px;
+  display: inline-block;
+  background: #f3f4f6;
+}
+
+.app-status-pending {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.app-status-accepted {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.app-status-rejected {
+  background: #fee2e2 !important;
+  color: #7f1d1d !important;
+}
+
+/* Empty message styling */
+.empty-message {
+  color: #6b7280 !important;
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+}

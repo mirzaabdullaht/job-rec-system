@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View and manage your bookmarked jobs on JobRec">
+  <title>My Bookmarks - JobRec</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" href="{% static 'css/visibility-improvements.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="{% url 'index' %}" class="logo">JobRec</a>
+      <ul class="nav-links">
+        <li><a href="{% url 'index' %}">Home</a></li>
+        <li><a href="{% url 'jobs' %}">Find Jobs</a></li>
+        <li><a href="{% url 'user_profile' %}">Profile</a></li>
+        <li><a href="{% url 'bookmarks' %}" aria-current="page">Bookmarks</a></li>
+        <li><a href="{% url 'applications' %}">Applications</a></li>
+        <li>
+          <button class="notification-icon" id="notificationBtn" data-action="open-notifications" title="Notifications" aria-label="Open notifications" style="background: none; border: none; cursor: pointer; padding: 0;">
+            <span aria-hidden="true">🔔</span>
+            <span id="notif-badge" class="notification-badge" style="display: none;" aria-live="polite">0</span>
+          </button>
+        </li>
+        <li><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="container page-content">
+    <h1 class="page-title">My Bookmarked Jobs</h1>
+    <section class="job-listings">
+      {% if jobs %}
+        {% for job in jobs %}
+        <article class="job-card" data-job-id="{{ job.id }}">
+          <div class="job-card-header">
+            <div class="company-logo-container">
+              {% if job.company_logo %}
+                <img src="{{ job.company_logo }}" 
+                     alt="{{ job.company_name }} Logo" 
+                     class="company-logo" 
+                     data-fallback="true">
+              {% else %}
+                <div class="company-logo-placeholder">
+                  {{ job.company_name|slice:":2"|upper }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="job-header-info">
+              <h3 class="job-title">{{ job.title }}</h3>
+              <p class="company-name">
+                <span aria-hidden="true">🏢</span>
+                <span class="sr-only">Company: </span>
+                {{ job.company_name }}
+              </p>
+            </div>
+            <span class="job-type-badge {% if job.job_type == 'Full-time' %}badge-fulltime{% elif job.job_type == 'Part-time' %}badge-parttime{% elif job.job_type == 'Contract' %}badge-contract{% else %}badge-internship{% endif %}">
+              <span aria-hidden="true">
+                {% if job.job_type == 'Full-time' %}💼{% elif job.job_type == 'Part-time' %}⏰{% elif job.job_type == 'Contract' %}📄{% else %}🎓{% endif %}
+              </span>
+              {{ job.job_type }}
+            </span>
+          </div>
+          <div class="job-meta">
+            <span class="job-location">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg> 
+              <span class="sr-only">Location:</span>
+              {{ job.location }}
+            </span>
+            {% if job.salary_min and job.salary_max %}
+            <span class="job-salary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
+              </svg> 
+              <span class="sr-only">Salary range:</span>
+              ${{ job.salary_min|floatformat:0 }} - ${{ job.salary_max|floatformat:0 }}
+            </span>
+            {% endif %}
+            <span class="job-posted">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+              </svg> 
+              <span class="sr-only">Posted:</span>
+              {{ job.posted_date|timesince }} ago
+            </span>
+          </div>
+          <p class="job-description">{{ job.description|truncatewords:25 }}</p>
+          <div class="job-card-footer">
+            <a href="#" class="btn btn-secondary view-details" data-job-id="{{ job.id }}" aria-label="View details for {{ job.title }}">View Details</a>
+            <button class="btn btn-primary btn-apply" data-job-id="{{ job.id }}" aria-label="Apply to {{ job.title }}">Apply</button>
+            <button class="btn btn-secondary btn-unbookmark" data-job-id="{{ job.id }}" aria-label="Remove {{ job.title }} from bookmarks">Remove</button>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <p>You have no bookmarked jobs yet.</p>
+          <a href="{% url 'jobs' %}" class="btn btn-primary">Browse Jobs</a>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 JobRec. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Notification Modal -->
+  <div id="notificationModal" class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title"><span aria-hidden="true">📬</span> Notifications</h2>
+        <button class="modal-close" data-action="close-notifications" aria-label="Close notifications">&times;</button>
+      </div>
+      <div id="notificationsList" class="list-container" role="list">
+        <p class="empty-message">Loading notifications...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

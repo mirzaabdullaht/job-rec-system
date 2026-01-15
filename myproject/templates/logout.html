@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Out - JobRec</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card" style="text-align: center;">
+            <h2 class="auth-title">You've Been Logged Out</h2>
+            <p class="auth-subtitle">Thank you for using JobRec. We hope to see you again soon!</p>
+            <a href="{% url 'index' %}" class="btn btn-primary" style="margin-right: 10px;">Go to Homepage</a>
+            <a href="{% url 'login' %}" class="btn btn-primary">Login / Sign Up</a>
+        </div>
+    </div>
+</body>
+</html>

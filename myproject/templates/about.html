@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About - JobRec</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container navbar-content">
+        <a href="{% url 'index' %}" class="logo">JobRec</a>
+        <ul class="nav-links">
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'jobs' %}">Find Jobs</a></li>
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'user_profile' %}">Profile</a></li>
+          <li><a href="{% url 'bookmarks' %}">Bookmarks</a></li>
+          <li><a href="{% url 'applications' %}">Applications</a></li>
+          <li>
+            <button class="notification-icon" id="notificationBtn" data-action="open-notifications" title="Notifications" aria-label="Open notifications">
+              <span aria-hidden="true">🔔</span>
+              <span id="notif-badge" class="notification-badge" style="display: none;" aria-live="polite"></span>
+            </button>
+          </li>
+          {% if user.is_staff %}
+          <li><a href="{% url 'admin_board' %}" class="btn-admin" title="Admin Dashboard">⚙️ Admin</a></li>
+          {% endif %}
+          <li><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'login' %}" class="btn btn-primary">Login / Sign Up</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <main class="container page-content">
+      <h1 class="page-title">About JobRec</h1>
+      <div style="max-width: 800px; margin: 0 auto;">
+        <p>JobRec is a comprehensive job access and recommendation system designed to connect job seekers with their ideal opportunities.</p>
+        
+        <h2>Features</h2>
+        <ul style="line-height: 1.8;">
+          <li><strong>Personalized Recommendations:</strong> Get job suggestions based on your skills and experience</li>
+          <li><strong>Easy Application:</strong> Apply to jobs with one click</li>
+          <li><strong>Job Bookmarks:</strong> Save jobs to review later</li>
+          <li><strong>Application Tracking:</strong> Keep track of your job applications</li>
+          <li><strong>Notifications:</strong> Stay updated on your application status</li>
+        </ul>
+
+        <h2>For Employers</h2>
+        <p>Our admin dashboard allows you to post jobs, manage applications, and find the best candidates for your positions.</p>
+        
+        <p><a href="{% url 'index' %}" class="btn btn-primary">Get Started</a></p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 JobRec. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title"><span aria-hidden="true">📬</span> Notifications</h2>
+          <button class="modal-close" data-action="close-notifications" aria-label="Close notifications">&times;</button>
+        </div>
+        <div id="notificationsList" class="list-container">
+          <p class="empty-message">Loading notifications...</p>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Access Recommendation</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/visibility-improvements.css' %}">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container navbar-content">
+        <a href="{% url 'index' %}" class="logo">JobRec</a>
+        <ul class="nav-links">
+          <li><a href="{% url 'index' %}">Home</a></li>
+          <li><a href="{% url 'jobs' %}">Find Jobs</a></li>
+          {% if user.is_authenticated %}
+          <li><a href="{% url 'user_profile' %}">Profile</a></li>
+          <li><a href="{% url 'bookmarks' %}">Bookmarks</a></li>
+          <li><a href="{% url 'applications' %}">Applications</a></li>
+          <li>
+            <button class="notification-icon" id="notificationBtn" data-action="open-notifications" title="Notifications" aria-label="Open notifications">
+              <span aria-hidden="true">🔔</span>
+              <span id="notif-badge" class="notification-badge" style="display: none;" aria-live="polite"></span>
+            </button>
+          </li>
+          {% if user.is_staff %}
+          <li><a href="{% url 'admin_board' %}" class="btn-admin" title="Admin Dashboard">⚙️ Admin</a></li>
+          {% endif %}
+          <li><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></li>
+          {% else %}
+          <li><a href="{% url 'login' %}" class="btn btn-primary">Login / Sign Up</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="container text-center">
+        <h1 class="hero-title">Find Your Next Opportunity</h1>
+        <p class="hero-subtitle">
+          Personalized job recommendations based on your skills and preferences.
+        </p>
+        <form class="search-bar-container" method="GET" action="{% url 'jobs' %}">
+          <input
+            type="text"
+            name="q"
+            class="search-bar"
+            placeholder="Search for jobs, keywords, or companies..."
+            value="{{ request.GET.q|default:'' }}"
+          />
+          <button type="submit" class="btn btn-search">Search</button>
+        </form>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="featured-jobs">
+        <h2 class="section-title">Featured Job Openings</h2>
+        <div class="job-grid">
+          {% if jobs %}
+            {% for job in jobs %}
+            <div class="job-card">
+              <div class="job-card-header">
+                <div class="company-logo-container">
+                  {% if job.company_logo %}
+                    <img src="{{ job.company_logo.url }}" alt="{{ job.company_name }} Logo" class="company-logo">
+                  {% else %}
+                    <div class="company-logo-placeholder">
+                      {{ job.company_name|first|upper }}
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="job-header-info">
+                  <h3 class="job-title">{{ job.title }}</h3>
+                  <p class="company-name">🏢 {{ job.company_name }}</p>
+                </div>
+              </div>
+              <div class="job-meta">
+                <span class="job-location">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg> 
+                  {{ job.location|default:"Location not specified" }}
+                </span>
+                <span class="job-type-badge {% if job.job_type == 'Full-time' %}badge-fulltime{% elif job.job_type == 'Part-time' %}badge-parttime{% elif job.job_type == 'Contract' %}badge-contract{% else %}badge-internship{% endif %}">
+                  {% if job.job_type == 'Full-time' %}💼{% elif job.job_type == 'Part-time' %}⏰{% elif job.job_type == 'Contract' %}📄{% else %}🎓{% endif %}
+                  {{ job.job_type|default:"Not specified" }}
+                </span>
+              </div>
+              {% if job.salary_min and job.salary_max %}
+              <div class="salary-range">
+                <p class="salary-text">
+                  💰 ${{ job.salary_min|floatformat:0 }} - ${{ job.salary_max|floatformat:0 }} /year
+                </p>
+              </div>
+              {% endif %}
+              <p class="job-description">{{ job.description|truncatewords:15|default:"No description available." }}</p>
+              <div class="job-card-footer">
+                {% if user.is_authenticated %}
+                <button class="btn btn-primary btn-apply" data-job-id="{{ job.id }}">Apply</button>
+                <button class="btn btn-bookmark" data-job-id="{{ job.id }}" data-bookmarked="{% if job.id in bookmarked_job_ids %}true{% else %}false{% endif %}">
+                  <span class="bookmark-icon">{% if job.id in bookmarked_job_ids %}📍{% else %}📌{% endif %}</span> 
+                  {% if job.id in bookmarked_job_ids %}Saved{% else %}Save{% endif %}
+                </button>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'index' %}" class="btn btn-primary">Login to Apply</a>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <p>No jobs available at the moment. Check back soon!</p>
+            </div>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 JobRec. All rights reserved. </p>
+      </div>
+    </footer>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title"><span aria-hidden="true">📬</span> Notifications</h2>
+          <button class="modal-close" data-action="close-notifications" aria-label="Close notifications">&times;</button>
+        </div>
+        <div id="notificationsList" class="list-container">
+          <p class="empty-message">Loading notifications... </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - JobRec</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=14">
+    <link rel="stylesheet" href="{% static 'css/admin_board.css' %}?v=14">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container navbar-content">
+        <a href="{% url 'index' %}" class="logo">⚙️ JobRec Admin</a>
+        <ul class="nav-links">
+          <li><a href="{% url 'index' %}">🏠 Home</a></li>
+          <li><a href="{% url 'jobs' %}">💼 View Jobs</a></li>
+          <li>
+            <button class="notification-icon" id="notificationBtn" data-action="open-notifications" title="Notifications" aria-label="Open notifications" style="background: none; border: none; cursor: pointer; padding: 0;">
+              <span aria-hidden="true">🔔</span>
+              <span id="notif-badge" class="notification-badge" style="display: none;" aria-live="polite">0</span>
+            </button>
+          </li>
+          <li><a href="/admin/" class="btn btn-secondary">🔧 Django Admin</a></li>
+          <li><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="admin-container">
+      <div class="admin-header">
+        <h1>⚡ Admin Dashboard</h1>
+        <p>Welcome, <strong>{{ user.username }}</strong>! 👋 Manage jobs, users, and view statistics.</p>
+      </div>
+
+      <!-- Statistics Section -->
+      <section class="stats-section">
+        <h2>📊 Quick Statistics</h2>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3 id="total-jobs">{{ stats.totalJobs|default:0 }}</h3>
+            <p>Total Jobs</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="active-jobs">{{ stats.activeJobs|default:0 }}</h3>
+            <p>Active Jobs</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="total-applications">{{ stats.totalApplications|default:0 }}</h3>
+            <p>Applications</p>
+          </div>
+          <div class="stat-card">
+            <h3 id="total-users">{{ stats.totalUsers|default:0 }}</h3>
+            <p>Registered Users</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Jobs Management Section -->
+      <section class="jobs-management">
+        <div class="section-header">
+          <h2>💼 Job Management</h2>
+          <div class="section-actions">
+            <button type="button" class="btn btn-primary" id="add-job-btn">
+              + Add New Job
+            </button>
+            <a
+              class="btn btn-secondary"
+              id="open-admin-backend"
+              href="/admin/jobAccess/job/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open Django Admin
+            </a>
+          </div>
+        </div>
+
+        <div class="filters">
+          <label for="search-jobs" class="visually-hidden">Search jobs</label>
+          <input type="text" id="search-jobs" class="search-input" placeholder="Search jobs by title, company, or location...">
+          <label for="filter-status" class="visually-hidden">Filter by status</label>
+          <select id="filter-status" class="filter-select">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div id="jobs-table-container" class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Applications</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobs-tbody">
+              {% if initial_jobs %}
+                {% for job in initial_jobs %}
+                  <tr data-id="{{ job.id }}">
+                    <td><strong>{{ job.title }}</strong></td>
+                    <td>{{ job.company_name }}</td>
+                    <td>{{ job.location|default:'N/A' }}</td>
+                    <td><span class="badge badge-info">{{ job.job_type|default:'N/A' }}</span></td>
+                    <td>
+                      <span class="badge {% if job.is_active %}badge-success{% else %}badge-secondary{% endif %}">
+                        {% if job.is_active %}Active{% else %}Inactive{% endif %}
+                      </span>
+                    </td>
+                    <td>{{ job.app_count|default:0 }}</td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-edit" data-action="edit" data-id="{{ job.id }}" title="Edit Job">✏️ Edit</button>
+                      <button type="button" class="btn btn-sm btn-delete" data-action="delete" data-id="{{ job.id }}" title="Delete Job">🗑️ Delete</button>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="7" class="text-center">No jobs found. Click "+ Add New Job" to create one.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Add Job Modal -->
+      <div id="job-modal" class="modal" role="dialog" aria-labelledby="job-modal-title" aria-modal="true">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="job-modal-title">Add New Job</h2>
+            <button type="button" class="modal-close" data-action="close-modal" aria-label="Close modal">&times;</button>
+          </div>
+          <form id="job-form">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="job-title">Job Title *</label>
+              <input type="text" id="job-title" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="company-name">Company Name *</label>
+              <input type="text" id="company-name" name="company_name" required>
+            </div>
+            <div class="form-group">
+              <label for="job-location">Location *</label>
+              <input type="text" id="job-location" name="location" required>
+            </div>
+            <div class="form-group">
+              <label for="job-type">Job Type *</label>
+              <select id="job-type" name="job_type" required>
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="job-description">Description *</label>
+              <textarea id="job-description" name="description" required rows="4"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="salary-min">Salary Min</label>
+                <input type="number" id="salary-min" name="salary_min" placeholder="e.g., 50000">
+              </div>
+              <div class="form-group">
+                <label for="salary-max">Salary Max</label>
+                <input type="number" id="salary-max" name="salary_max" placeholder="e.g., 100000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="job-active">
+                <input type="checkbox" id="job-active" name="is_active" checked>
+                Active
+              </label>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Create Job</button>
+              <button type="button" class="btn btn-secondary" data-action="close-modal">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2026 JobRec Admin Panel. All rights reserved. </p>
+      </div>
+    </footer>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="modal" role="dialog" aria-labelledby="modal-title" aria-modal="true" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title"><span aria-hidden="true">📬</span> Notifications</h2>
+          <button type="button" class="modal-close" data-action="close-notifications" aria-label="Close notifications">&times;</button>
+        </div>
+        <div id="notificationsList" class="list-container">
+          <p class="empty-message">Loading notifications...</p>
+        </div>
+      </div>
+    </div>
+
+    {% if admin_preload %}
+      {{ admin_preload|json_script:"admin-preload-data" }}
+    {% else %}
+      <script id="admin-preload-data" type="application/json">{}</script>
+    {% endif %}
+    <script>
+      (function() {
+        var preloadEl = document.getElementById('admin-preload-data');
+        if (preloadEl) {
+          try {
+            window.__ADMIN_PRELOAD__ = JSON.parse(preloadEl.textContent);
+          } catch (err) {
+            console.warn('Failed to parse admin preload data:', err);
+          }
+        }
+      })();
+    </script>
+    <script src="{% static 'js/admin_board.js' %}?v=12"></script>
+  </body>
+</html>
+
+

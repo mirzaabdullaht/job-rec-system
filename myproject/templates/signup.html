@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up - JobRec</title>
+    <link rel="stylesheet" href="/static/css/forms.css" />
+    <link rel="stylesheet" href="/static/css/visibility-improvements.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <form id="signupForm" data-action="{% url 'signup' %}" method="post">
+      {% csrf_token %}
+      <div class="auth-container">
+        <div class="auth-card">
+          <h2 class="auth-title">Create an Account</h2>
+          <p class="auth-subtitle">Join us to find your dream job today!</p>
+
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required />
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm_password" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Sign Up
+          </button>
+
+          <p class="auth-switch">
+            Already have an account? <a href="{% url 'login' %}">Log In</a>
+          </p>
+        </div>
+      </div>
+    </form>
+
+    <script src="{% static 'js/auth.js' %}"></script>
+  </body>
+</html>

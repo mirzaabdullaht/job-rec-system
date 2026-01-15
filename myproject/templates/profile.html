@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your JobRec profile, skills, education, and work experience">
+    <title>My Profile - JobRec</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/visibility-improvements.css' %}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="{% url 'index' %}" class="logo">JobRec</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'index' %}">Home</a></li>
+                <li><a href="{% url 'jobs' %}">Find Jobs</a></li>
+                <li><a href="{% url 'user_profile' %}" aria-current="page">Profile</a></li>
+                <li><a href="{% url 'bookmarks' %}">Bookmarks</a></li>
+                <li><a href="{% url 'applications' %}">Applications</a></li>
+                <li>
+                    <button class="notification-icon" id="notificationBtn" data-action="open-notifications" title="Notifications" aria-label="Open notifications" style="background: none; border: none; cursor: pointer; padding: 0;">
+                        <span aria-hidden="true">🔔</span>
+                        <span id="notif-badge" class="notification-badge" style="display: none;" aria-live="polite">0</span>
+                    </button>
+                </li>
+                {% if user.is_staff %}
+                <li><a href="{% url 'admin_board' %}" class="btn-admin" title="Admin Dashboard">⚙️ Admin</a></li>
+                {% endif %}
+                <li><a href="{% url 'logout' %}" class="btn btn-primary">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container page-content">
+        <h1 class="page-title">Your Profile</h1>
+        <div class="profile-layout">
+            <aside class="profile-card">
+                <input type="file" id="profilePicInput" style="display: none;" accept="image/*" aria-label="Upload profile picture">
+                {% if profile.profile_picture %}
+                <img id="profilePic" 
+                     src="{{ profile.profile_picture.url }}" 
+                     alt="Profile picture of {{ user.get_full_name|default:user.username }}" 
+                     class="profile-avatar" 
+                     data-fallback="true"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Click to change profile picture">
+                {% else %}
+                <div id="profilePic" 
+                     class="profile-avatar-placeholder" 
+                     tabindex="0"
+                     role="button"
+                     aria-label="Click to upload profile picture">
+                    {{ user.username|slice:':1'|upper }}
+                </div>
+                {% endif %}
+                <h2 class="profile-name">{{ user.get_full_name|default:user.username }}</h2>
+                <p class="profile-headline">{{ user.email }}</p>
+                <p class="profile-headline">
+                    <span class="sr-only">Member since</span>
+                    <span aria-hidden="true">📅</span> {{ user.date_joined|date:"M Y" }}
+                </p>
+                <div class="profile-stats" role="region" aria-label="Profile statistics">
+                    <p class="profile-stat">
+                        <strong>Applications:</strong> 
+                        <span id="app-count" aria-live="polite">0</span>
+                    </p>
+                    <p class="profile-stat">
+                        <strong>Bookmarks:</strong> 
+                        <span id="bookmark-count" aria-live="polite">0</span>
+                    </p>
+                </div>
+                <button class="btn btn-primary" id="changePicBtn" data-action="change-picture">Change Picture</button>
+                <button class="btn btn-secondary" id="editProfileBtn" data-action="edit-profile">Edit Profile</button>
+            </aside>
+
+            <div class="profile-details">
+                <section class="detail-section">
+                    <h3>About Me</h3>
+                    <p id="bioText">{{ profile.bio|default:"No bio yet." }}</p>
+                </section>
+
+                <section class="detail-section">
+                    <div class="section-header">
+                        <h3>Skills</h3>
+                        <button class="btn btn-secondary btn-sm" id="addSkillBtn" data-action="add-skill" aria-label="Add new skill">
+                            <span aria-hidden="true">+</span> Add
+                        </button>
+                    </div>
+                    <div class="skills-container" id="skillsContainer" role="list" aria-label="Your skills">
+                        {% for s in profile.skills.all %}
+                        <span class="skill-tag" role="listitem">{{ s.name }}</span>
+                        {% empty %}
+                        <p class="empty-message">No skills added yet.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <h3>Resume / CV</h3>
+                    {% if profile.resume %}
+                    <p>
+                        <a href="{{ profile.resume.url }}" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="btn btn-secondary btn-sm"
+                           aria-label="Download your resume (opens in new tab)">
+                            <span aria-hidden="true">📄</span> Download Resume
+                        </a>
+                    </p>
+                    {% else %}
+                    <p class="empty-message">No resume uploaded. </p>
+                    {% endif %}
+                    <form id="resumeForm" enctype="multipart/form-data" class="resume-upload-form">
+                        {% csrf_token %}
+                        <label for="resumeInput" class="sr-only">Upload resume file</label>
+                        <input type="file" 
+                               name="resume" 
+                               id="resumeInput" 
+                               accept="application/pdf,. doc,.docx"
+                               aria-describedby="resume-help">
+                        <small id="resume-help" class="form-help">Accepted formats: PDF, DOC, DOCX</small>
+                        <button type="submit" class="btn btn-primary btn-sm">Upload Resume</button>
+                    </form>
+                </section>
+
+                <section class="detail-section">
+                    <div class="section-header">
+                        <h3><span aria-hidden="true">📚</span> Education</h3>
+                        <button class="btn btn-secondary btn-sm" id="addEducationBtn" data-action="add-education" aria-label="Add education entry">
+                            <span aria-hidden="true">+</span> Add
+                        </button>
+                    </div>
+                    <div id="educationList" class="list-container" role="list" aria-label="Your education history">
+                        {% for e in profile.education.all %}
+                        <article class="list-item" role="listitem">
+                            <div class="list-item-icon" aria-hidden="true">🎓</div>
+                            <div class="list-item-content">
+                                <strong>{{ e.degree }}</strong>
+                                <p>{{ e.institution }}</p>
+                                <small>{{ e.start_year }} - {{ e.end_year }}</small>
+                            </div>
+                        </article>
+                        {% empty %}
+                        <p class="empty-message">No education added yet.  Add your education history. </p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <div class="section-header">
+                        <h3><span aria-hidden="true">💼</span> Experience</h3>
+                        <button class="btn btn-secondary btn-sm" id="addExperienceBtn" data-action="add-experience" aria-label="Add work experience">
+                            <span aria-hidden="true">+</span> Add
+                        </button>
+                    </div>
+                    <div id="experienceList" class="list-container" role="list" aria-label="Your work experience">
+                        {% for x in profile.experience.all %}
+                        <article class="list-item" role="listitem">
+                            <div class="list-item-icon" aria-hidden="true">💻</div>
+                            <div class="list-item-content">
+                                <strong>{{ x.role }}</strong>
+                                <p>{{ x.company }}</p>
+                                <small>
+                                    {% if x.start_date %}{{ x.start_date|date:"M d, Y" }}{% else %}N/A{% endif %} - 
+                                    {% if x.end_date %}{{ x.end_date|date:"M d, Y" }}{% else %}Present{% endif %}
+                                </small>
+                                {% if x.description %}
+                                <p class="experience-description">{{ x.description }}</p>
+                                {% endif %}
+                            </div>
+                        </article>
+                        {% empty %}
+                        <p class="empty-message">No experience added yet. Add your work experience.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="detail-section">
+                    <h3><span aria-hidden="true">🔔</span> Recent Notifications</h3>
+                    <ul id="recentNotificationsList" class="notifications-list" aria-label="Recent notifications">
+                        {% for n in notifications %}
+                        <li>
+                            {{ n.message }} 
+                            <small><time datetime="{{ n.created_at|date:'c' }}">({{ n.created_at|date:"M d, H:i" }})</time></small>
+                        </li>
+                        {% empty %}
+                        <li class="empty-message">No notifications.</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+        </div>
+        
+        <section class="recommended-jobs">
+            <h2 class="section-title">Jobs Recommended For You</h2>
+            <div class="job-grid">
+                {% for job in recommended_jobs %}
+                <article class="job-card" data-job-id="{{ job.id }}">
+                    <div class="job-card-header">
+                        <div class="company-logo-container">
+                            {% if job.company_logo %}
+                            <img src="{{ job.company_logo }}" 
+                                 alt="{{ job.company_name }} Logo" 
+                                 class="company-logo" 
+                                 data-fallback="true">
+                            {% else %}
+                            <div class="company-logo-placeholder">
+                                {{ job.company_name|slice:": 2"|upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="job-header-info">
+                            <h3 class="job-title">{{ job.title }}</h3>
+                            <p class="company-name">
+                                <span aria-hidden="true">🏢</span>
+                                <span class="sr-only">Company: </span>
+                                {{ job.company_name }}
+                            </p>
+                        </div>
+                        <span class="job-type-badge {% if job.job_type == 'Full-time' %}badge-fulltime{% elif job.job_type == 'Part-time' %}badge-parttime{% elif job.job_type == 'Contract' %}badge-contract{% else %}badge-internship{% endif %}">
+                            <span aria-hidden="true">
+                                {% if job.job_type == 'Full-time' %}💼{% elif job.job_type == 'Part-time' %}⏰{% elif job.job_type == 'Contract' %}📄{% else %}🎓{% endif %}
+                            </span>
+                            {{ job.job_type }}
+                        </span>
+                    </div>
+                    <div class="job-meta">
+                        <span class="job-location">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg> 
+                            <span class="sr-only">Location: </span>
+                            {{ job.location }}
+                        </span>
+                    </div>
+                    <p class="job-description">{{ job.description|truncatewords:20 }}</p>
+                    <div class="job-card-footer">
+                        <button class="btn btn-primary btn-apply" data-job-id="{{ job.id }}" aria-label="Apply to {{ job.title }}">
+                            <span aria-hidden="true">💼</span> Apply
+                        </button>
+                        <a href="{% url 'jobs' %}" class="btn btn-secondary">
+                            <span aria-hidden="true">🔍</span> More Jobs
+                        </a>
+                    </div>
+                </article>
+                {% empty %}
+                <div class="empty-state">
+                    <p>No job recommendations available yet.</p>
+                    <a href="{% url 'jobs' %}" class="btn btn-primary">Browse All Jobs</a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit Bio Modal -->
+    <div id="editBioModal" class="modal" role="dialog" aria-labelledby="edit-bio-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="edit-bio-title">Edit Bio</h3>
+                <button class="modal-close" data-modal="editBioModal" aria-label="Close edit bio dialog">&times;</button>
+            </div>
+            <form id="bioForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="bioInput">Bio</label>
+                    <textarea id="bioInput" 
+                              rows="4" 
+                              class="form-control"
+                              aria-describedby="bio-help"
+                              maxlength="500"></textarea>
+                    <small id="bio-help" class="form-help">Tell us about yourself (max 500 characters)</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal="editBioModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Skill Modal -->
+    <div id="addSkillModal" class="modal" role="dialog" aria-labelledby="add-skill-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-skill-title">Add Skill</h3>
+                <button class="modal-close" data-modal="addSkillModal" aria-label="Close add skill dialog">&times;</button>
+            </div>
+            <form id="skillForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="skillInput">Skill Name</label>
+                    <input type="text" 
+                           id="skillInput" 
+                           class="form-control"
+                           placeholder="e.g., Python, React" 
+                           required
+                           aria-describedby="skill-help">
+                    <small id="skill-help" class="form-help">Enter a skill or technology you know</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal="addSkillModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Education Modal -->
+    <div id="addEducationModal" class="modal" role="dialog" aria-labelledby="add-education-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-education-title">Add Education</h3>
+                <button class="modal-close" data-modal="addEducationModal" aria-label="Close add education dialog">&times;</button>
+            </div>
+            <form id="educationForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="institutionInput">Institution</label>
+                    <input type="text" id="institutionInput" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="degreeInput">Degree</label>
+                    <input type="text" id="degreeInput" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startYearInput">Start Year</label>
+                        <input type="number" 
+                               id="startYearInput" 
+                               class="form-control" 
+                               min="1950" 
+                               max="2100" 
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endYearInput">End Year</label>
+                        <input type="number" 
+                               id="endYearInput" 
+                               class="form-control" 
+                               min="1950" 
+                               max="2100" 
+                               required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal="addEducationModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Experience Modal -->
+    <div id="addExperienceModal" class="modal" role="dialog" aria-labelledby="add-experience-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="add-experience-title">Add Experience</h3>
+                <button class="modal-close" data-modal="addExperienceModal" aria-label="Close add experience dialog">&times;</button>
+            </div>
+            <form id="experienceForm">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="companyInput">Company</label>
+                    <input type="text" id="companyInput" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="roleInput">Role</label>
+                    <input type="text" id="roleInput" class="form-control" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDateInput">Start Date</label>
+                        <input type="date" id="startDateInput" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDateInput">End Date</label>
+                        <input type="date" id="endDateInput" class="form-control">
+                        <small class="form-help">Leave empty if currently working</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="descriptionInput">Description</label>
+                    <textarea id="descriptionInput" 
+                              rows="3" 
+                              class="form-control"
+                              placeholder="Describe your responsibilities and achievements"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-modal="addExperienceModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notificationModal" class="modal" role="dialog" aria-labelledby="notifications-title" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="notifications-title"><span aria-hidden="true">📬</span> Notifications</h2>
+                <button class="modal-close" data-action="close-notifications" aria-label="Close notifications">&times;</button>
+            </div>
+            <div id="notificationsList" class="list-container" role="list">
+                <p class="empty-message">Loading notifications...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 JobRec. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+        // Pass CSRF token to external JS
+        window.CSRF_TOKEN = '{{ csrf_token }}';
+    </script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/profile.js' %}"></script>
+</body>
+</html>
