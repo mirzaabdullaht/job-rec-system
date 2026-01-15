@@ -134,7 +134,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+# On Vercel, serve static files directly from repo via routing
+STATIC_URL = '/static/' if not IS_VERCEL else '/static/'
 
 # Where collectstatic will place files for production serving
 STATIC_ROOT = BASE_DIR / 'staticfiles'

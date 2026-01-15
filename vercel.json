@@ -4,6 +4,7 @@
     { "src": "api/django.py", "use": "@vercel/python" }
   ],
   "routes": [
+    { "src": "/static/(.*)", "dest": "/myproject/static/$1" },
     { "src": "/(.*)", "dest": "api/django.py" }
   ]
 }
