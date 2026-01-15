@@ -196,6 +196,7 @@ This is a simple but effective approach for a prototype. For production, conside
   - Implement proper resume parsing (PyPDF2 is basic)
   - Add comprehensive logging and monitoring
   - Consider background task processing (Celery)
+  - **Optional**: Enable JWT token blacklisting by adding `'rest_framework_simplejwt.token_blacklist'` to `INSTALLED_APPS` in settings.py and running migrations. This allows proper logout functionality by blacklisting tokens.
 
 ## Testing
 

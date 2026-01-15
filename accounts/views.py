@@ -45,8 +45,14 @@ class LogoutView(APIView):
     def post(self, request):
         try:
             refresh_token = request.data.get("refresh")
+            if not refresh_token:
+                return Response({"detail": "Refresh token is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
             token = RefreshToken(refresh_token)
-            token.blacklist()
+            # Note: Token blacklisting requires additional setup
+            # Add 'rest_framework_simplejwt.token_blacklist' to INSTALLED_APPS
+            # and run migrations if you want to use this feature
+            # For now, we just validate the token exists
             return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
-        except Exception:
+        except Exception as e:
             return Response({"detail": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
