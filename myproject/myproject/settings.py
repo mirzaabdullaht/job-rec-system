@@ -202,3 +202,10 @@ if IS_RENDER:
     # Allow Render domains
     if '.onrender.com' not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append('.onrender.com')
+
+# PythonAnywhere configuration
+IS_PYTHONANYWHERE = 'PYTHONANYWHERE_DOMAIN' in os.environ or 'pythonanywhere.com' in os.getenv('HTTP_HOST', '')
+if IS_PYTHONANYWHERE:
+    # Allow PythonAnywhere domains
+    if '.pythonanywhere.com' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('.pythonanywhere.com')
