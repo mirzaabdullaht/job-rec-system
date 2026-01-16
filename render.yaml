@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: job-rec-system
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "cd myproject && gunicorn myproject.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: false
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: job-rec-db
+          property: connectionString
+
+databases:
+  - name: job-rec-db
+    databaseName: job_rec_system
+    user: job_rec_user

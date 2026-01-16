@@ -187,6 +187,8 @@ if not DEBUG:
 # Vercel serves static assets directly from the repository, so avoid WhiteNoise
 # and manifest storage that requires collectstatic on ephemeral builds.
 IS_VERCEL = os.getenv('VERCEL') == '1' or os.getenv('VERCEL_ENV') is not None
+IS_RENDER = os.getenv('RENDER') is not None
+
 if IS_VERCEL:
     # Remove WhiteNoise middleware if present
     MIDDLEWARE = [m for m in MIDDLEWARE if not m.startswith('whitenoise.')]
@@ -195,3 +197,8 @@ if IS_VERCEL:
     # Allow Vercel dynamic preview and project domains by default
     if '.vercel.app' not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append('.vercel.app')
+
+if IS_RENDER:
+    # Allow Render domains
+    if '.onrender.com' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('.onrender.com')
