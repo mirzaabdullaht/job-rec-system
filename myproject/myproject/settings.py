@@ -139,7 +139,6 @@ IS_RENDER = os.getenv('RENDER') is not None
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-# On Vercel, serve static files directly from repo via routing
 STATIC_URL = '/static/'
 
 # Where collectstatic will place files for production serving
