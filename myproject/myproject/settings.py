@@ -131,11 +131,16 @@ USE_I18N = True
 USE_TZ = True
 
 
+# --- Deployment environment detection ---
+# Detect deployment platform before configuring static files
+IS_VERCEL = os.getenv('VERCEL') == '1' or os.getenv('VERCEL_ENV') is not None
+IS_RENDER = os.getenv('RENDER') is not None
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 # On Vercel, serve static files directly from repo via routing
-STATIC_URL = '/static/' if not IS_VERCEL else '/static/'
+STATIC_URL = '/static/'
 
 # Where collectstatic will place files for production serving
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -186,8 +191,6 @@ if not DEBUG:
 # --- Vercel runtime adjustments ---
 # Vercel serves static assets directly from the repository, so avoid WhiteNoise
 # and manifest storage that requires collectstatic on ephemeral builds.
-IS_VERCEL = os.getenv('VERCEL') == '1' or os.getenv('VERCEL_ENV') is not None
-IS_RENDER = os.getenv('RENDER') is not None
 
 if IS_VERCEL:
     # Remove WhiteNoise middleware if present
